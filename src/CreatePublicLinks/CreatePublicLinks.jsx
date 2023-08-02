@@ -79,7 +79,7 @@ function CustomControl({ context }) {
         // Save the public link entity
         try {
           await context.client.entities.saveAsync(publicLink);
-          alert("Public link has been created");
+          alert("Public link has been created for " + element);
         } catch (error) {
           console.log(error);
           alert("Something went wrong! Plese check the logs");
