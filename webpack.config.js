@@ -7,6 +7,7 @@ module.exports = {
     Hello: "./src/Hello/HelloSUGCON.js",
     PublicLink: "./src/PublicLinks/publiclinks.jsx",
     CreatePublicLink: "./src/CreatePublicLinks/CreatePublicLinks.jsx",
+    OpenAIImage:"./src/OpenAIImage/index.jsx"
   },
   module: {
     rules: [
