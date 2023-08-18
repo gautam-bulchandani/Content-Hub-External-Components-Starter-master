@@ -5,7 +5,7 @@ import { RealtimeRequestByUsername } from "@sitecore/sc-contenthub-webclient-sdk
 
 export default function createExternalRoot(container) {
   const clickHandler = async (message) => {
-    alert(`Welcome ${message} from Gautam and Tushar`);
+    alert(` ${message}`);
   };
 
   return {
