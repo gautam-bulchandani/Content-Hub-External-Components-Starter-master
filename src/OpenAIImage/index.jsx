@@ -78,7 +78,7 @@ function GenerateAIImage({ context }) {
       {loading ? (
         <>
           <h2>Generating image Please Wait..</h2>
-          <img src="https://ps-ch-playground.sitecoresandbox.cloud/api/public/content/loading%2FDownloadOriginal?v=8e1a97fb"></img>
+          <img src="https://ps-ch-playground.sitecoresandbox.cloud/api/public/content/a91d363ffbbb4cdd8bc060d9b8bf5ca2?v=da0c16fd"></img>
         </>
       ) : uploading ? (
         <>
@@ -107,7 +107,7 @@ function GenerateAIImage({ context }) {
                 marginBottom: "64px",
               }}
             >
-              Generate an Image
+              Generate Image
             </Button>
             <Button
               variant="contained"
