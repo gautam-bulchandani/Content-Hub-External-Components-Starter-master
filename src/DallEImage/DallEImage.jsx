@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { Configuration, OpenAIApi } from "openai";
 import URI from "urijs";
 import Button from "@mui/material/Button";
-import "../DallEImage/DallEImage.css"
+import "../DallEImage/DallEImage.css";
 import { HttpUploadSource } from "@sitecore/sc-contenthub-webclient-sdk/dist/models/upload/http-upload-source";
 import { UploadRequest } from "@sitecore/sc-contenthub-webclient-sdk/dist/models/upload/upload-request";
 
@@ -32,12 +32,13 @@ function GenerateAIImage({ context }) {
 
   const generateImage = async () => {
     try {
+      setLoading(true);
       const res = await openai.createImage({
         prompt: prompt,
         n: parseInt(context.config.numOfImage),
         size: context.config.imageSize,
       });
-
+      setLoading(false);
       const imageUrls = res.data.data.map((item) => item.url);
       setPublicUrls(imageUrls);
     } catch (error) {
@@ -56,13 +57,16 @@ function GenerateAIImage({ context }) {
   };
   const uploadSelectedImages = async () => {
     console.log("Selected Images:", selectedImages);
-
+    setupLoading(true);
     // Create an array to store all the UploadRequest objects
     const uploadRequests = selectedImages.map((imageUrl) => {
       const imgUrl = new URI(imageUrl);
       var imageName = imageUrl.match(/\w*(?=.\w+$)/);
-      var imageext = imageUrl.split(/[#?]/)[0].split('.').pop().trim();    
-      const uploadSource = new HttpUploadSource(imgUrl, imageName + '.' + imageext);
+      var imageext = imageUrl.split(/[#?]/)[0].split(".").pop().trim();
+      const uploadSource = new HttpUploadSource(
+        imgUrl,
+        imageName + "." + imageext
+      );
       return new UploadRequest(
         uploadSource,
         "AssetUploadConfiguration",
@@ -80,6 +84,7 @@ function GenerateAIImage({ context }) {
       );
       // Log the upload results
       console.log("Upload Results:", uploadResults);
+      setupLoading(false);
     } catch (error) {
       console.error("Error uploading images:", error);
     }
@@ -87,64 +92,79 @@ function GenerateAIImage({ context }) {
 
   return (
     <div className="create-container">
-      <div className="create-image-container">
-        <h2>Generate an Image using Open AI API</h2>
-
-        <textarea
-          className="app-input"
-          placeholder="Search Bears with Paint Brushes the Starry Night, painted by Vincent Van Gogh.."
-          onChange={(e) => setPrompt(e.target.value)}
-          rows="10"
-          cols="40"
-        />
-      </div>
-      <div className="image-operation-container">
-        <Button
-          variant="contained"
-          disableElevation
-          onClick={() => generateImage()}
-          style={{
-            backgroundColor: "green",
-            marginRight: "30px",
-            marginBottom: "64px",
-          }}
-        >
-          Generate an Image
-        </Button>
-        <Button
-          variant="contained"
-          disableElevation
-          onClick={() => uploadSelectedImages()}
-          style={{
-            marginBottom: "64px",
-          }}
-        >
-          Upload Image
-        </Button>
-      </div>
-      <div className="image-list-container">
-        {publicUrls.length > 0 ? (
-          publicUrls.map((imageUrl, index) => (
-            <div key={index} className="image-box-main">
-              <label className="image-box-chk-lable">
-                <input
-                  type="checkbox"
-                  onChange={() => handleCheckboxChange(imageUrl)}
-                  checked={selectedImages.includes(imageUrl)}
-                />
-                Image {index + 1}
-              </label>
-              <img
-                className="image-box"
-                src={imageUrl}
-                alt={`Image${index + 1}`}
-              />
-            </div>
-          ))
-        ) : (
-          <h1>Loading...</h1>
-        )}
-      </div>
+      {loading ? (
+        <>
+          <h2>Generating image Please Wait..</h2>
+          <img src="https://ps-ch-playground.sitecoresandbox.cloud/api/public/content/loading%2FDownloadOriginal?v=8e1a97fb"></img>
+        </>
+      ) : uploading ? (
+        <>
+          <h2>Uploading into Content Hub Please Wait..</h2>
+          <img src="https://ps-ch-playground.sitecoresandbox.cloud/api/public/content/e3cbf10d70e44f0aaed7aca69a97e7cb?v=19f722d2"></img>
+        </>
+      ) : (
+        <>
+          <div className="create-image-container">
+            <h2 className="css-1y8j3c6-pageTitleClass">AI Image Generator</h2>            
+          </div>
+          <div className="image-operation-container">
+          <textarea
+              className="app-input"
+              placeholder="Search Bears with Paint Brushes the Starry Night, painted by Vincent Van Gogh.."
+              onChange={(e) => setPrompt(e.target.value)}
+              rows="10"
+              cols="40"
+            />
+            <Button
+              variant="contained"
+              disableElevation
+              onClick={() => generateImage()}
+              style={{
+                backgroundColor: "green",
+                marginRight: "30px",
+                marginBottom: "64px",
+              }}
+            >
+              Generate an Image
+            </Button>
+          </div>
+          <div className="image-list-container">
+            {publicUrls.length > 0 ? (
+              publicUrls.map((imageUrl, index) => (
+                <div key={index} className="image-box-main">
+                  <label className="image-box-chk-lable">
+                    <input
+                      type="checkbox"
+                      onChange={() => handleCheckboxChange(imageUrl)}
+                      checked={selectedImages.includes(imageUrl)}
+                    />
+                    Image {index + 1}
+                  </label>
+                  <img
+                    className="image-box"
+                    src={imageUrl}
+                    alt={`Image${index + 1}`}
+                  />
+                </div>
+              ))
+            ) : (
+              <></>
+            )}
+          </div>
+          {publicUrls?.length>0?(<>
+            <Button
+              variant="contained"
+              disableElevation
+              onClick={() => uploadSelectedImages()}
+              style={{
+                marginBottom: "64px",
+              }}
+            >
+              Upload Image
+            </Button>
+          </>):(<></>)}
+        </>
+      )}
     </div>
   );
 }
