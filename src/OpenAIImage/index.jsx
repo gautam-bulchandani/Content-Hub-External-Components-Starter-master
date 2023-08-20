@@ -1,13 +1,14 @@
 import ReactDOM from "react-dom";
+import { v4 as uuidv4 } from "uuid";
 import React, { useState, useEffect } from "react";
 import { Configuration, OpenAIApi } from "openai";
-import { Button } from "@mui/material/Button";
+import Button from "@mui/material/Button";
 import "../OpenAIImage/style.css";
-import { Checkbox } from "@mui/material";
+import { Alert, Checkbox } from "@mui/material";
 import "@sitecore/sc-contenthub-webclient-sdk/dist/clients/upload-client";
-import URI from "urijs"
-import {HttpUploadSource} from '@sitecore/sc-contenthub-webclient-sdk/dist/models/upload/http-upload-source';
-import { UploadRequest } from '@sitecore/sc-contenthub-webclient-sdk/dist/models/upload/upload-request';
+import URI from "urijs";
+import { HttpUploadSource } from "@sitecore/sc-contenthub-webclient-sdk/dist/models/upload/http-upload-source";
+import { UploadRequest } from "@sitecore/sc-contenthub-webclient-sdk/dist/models/upload/upload-request";
 
 export default function OpenAIImage(container) {
   return {
@@ -21,20 +22,17 @@ export default function OpenAIImage(container) {
 }
 
 function GenerateAIImage({ context }) {
- 
   const noOfImg = parseInt(context.config.numOfImage);
-  const imageSize = context.config.imageSize;  
+  const imageSize = context.config.imageSize;
   const [prompt, setPrompt] = useState("");
-  const [result, setResult] = useState([]);
+  const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
-  const [placeholder, setPlaceholder] = useState(
-    "Search Bears with Paint Brushes the Starry Night, painted by Vincent Van Gogh.."
-  );
+  const [uploading, setupLoading] = useState(false);
+  const [placeholder, setPlaceholder] = useState("Search with any keyword..");
   const configuration = new Configuration({
     apiKey: context.config.openAIKey,
   });
-  console.log("configuration.apiKey");
-  console.log(configuration.apiKey);  
+
   const openai = new OpenAIApi(configuration);
 
   const generateImage = async () => {
@@ -47,39 +45,50 @@ function GenerateAIImage({ context }) {
     });
 
     setLoading(false);
-    setResult(res.data.data.map((i) => i.url));
-   // setResult("https://cdn.pixabay.com/photo/2018/03/22/02/37/email-3249062_1280.png");
-    console.log("OPEN AI Image URL");
-    console.log(result);
+    setResult(res.data.data[0].url);
   };
 
-  const uploadImageHandler = async () => {
-  
-    console.log("uploadImageHandler - ",result);
-    // const imgUrl = new URI("https://cdn.pixabay.com/photo/2018/03/22/02/37/email-3249062_1280.png"); 
-    // const uploadSource = new HttpUploadSource(imgUrl,"email-3249062_1280");
-    // const request = new UploadRequest(
-    //   uploadSource,
-    //   "AssetUploadConfiguration",
-    //   "NewAsset"
-    // );
-    // const result = await context.client.uploads.uploadAsync(request);
+  const uploadImageHandler = () => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        setupLoading(true);
+        const url = await result; // Some async operation that provides a result
+        console.log("uploadImageHandler - ", url);
+
+        const imgUrl = new URI("https://cors-anywhere.herokuapp.com/" + url);
+        const guid = uuidv4();
+        const uploadSource = new HttpUploadSource(imgUrl, `${guid}.png`);
+        const request = new UploadRequest(
+          uploadSource,
+          "AssetUploadConfiguration",
+          "NewAsset"
+        );
+
+        const uploadResult = await context.client.uploads.uploadAsync(request);
+        setupLoading(false);
+        resolve(uploadResult);
+      } catch (error) {
+        reject(error);
+      }
+    });
   };
 
   return (
     <div className="app-main">
       {loading ? (
         <>
-          <h2>Generating..Please Wait..</h2>
-          <div class="lds-ripple">
-            <div></div>
-            <div></div>
-          </div>
+          <h2>Generating image Please Wait..</h2>
+          <img src="https://ps-ch-playground.sitecoresandbox.cloud/api/public/content/loading%2FDownloadOriginal?v=8e1a97fb"></img>
+        </>
+      ) : uploading ? (
+        <>
+          <h2>Uploading into Content Hub Please Wait..</h2>
+          <img src="https://ps-ch-playground.sitecoresandbox.cloud/api/public/content/e3cbf10d70e44f0aaed7aca69a97e7cb?v=19f722d2"></img>
         </>
       ) : (
         <>
           <div className="col-12" theme={context.theme}>
-            <h2 theme={context.theme}>Generate an Image using Open AI API</h2>
+            <h2 theme={context.theme}>Generate an Image using Open AI</h2>
             <textarea
               theme={context.theme}
               className="app-input"
@@ -88,21 +97,35 @@ function GenerateAIImage({ context }) {
               rows="10"
               cols="40"
             />
-            <button id="btnGenerateImage" onClick={generateImage}>
+            <Button
+              variant="contained"
+              disableElevation
+              onClick={() => generateImage()}
+              style={{
+                backgroundColor: "green",
+                marginRight: "30px",
+                marginBottom: "64px",
+              }}
+            >
               Generate an Image
-            </button>
-            <button
-              id="btnuploadImage"
+            </Button>
+            <Button
+              variant="contained"
+              disableElevation
               onClick={() => uploadImageHandler()}
+              style={{
+                marginBottom: "64px",
+              }}
             >
               Upload Image
-            </button>
+            </Button>
           </div>
           <div className="col-12">
-            {result.length > 0 ? (
-              result.map((i) => (
-                <img className="result-image" src={i} alt="result" />
-              ))
+            {result != "" ? (
+              // result.map((i) => (
+              //   <img className="result-image" src={i} alt="result" />
+              // ))
+              <img className="result-image" src={result} alt="result" />
             ) : (
               <></>
             )}
