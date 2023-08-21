@@ -60,7 +60,7 @@ function GenerateAIImage({ context }) {
     setupLoading(true);
     // Create an array to store all the UploadRequest objects
     const uploadRequests = selectedImages.map((imageUrl) => {
-      const imgUrl = new URI(imageUrl);
+      const imgUrl = new URI("https://cors-anywhere.herokuapp.com/" + imageUrl);
       var imageName = imageUrl.match(/\w*(?=.\w+$)/);
       var imageext = imageUrl.split(/[#?]/)[0].split(".").pop().trim();
       const uploadSource = new HttpUploadSource(
@@ -95,7 +95,7 @@ function GenerateAIImage({ context }) {
       {loading ? (
         <>
           <h2>Generating image Please Wait..</h2>
-          <img src="https://ps-ch-playground.sitecoresandbox.cloud/api/public/content/loading%2FDownloadOriginal?v=8e1a97fb"></img>
+          <img src="https://ps-ch-playground.sitecoresandbox.cloud/api/public/content/a91d363ffbbb4cdd8bc060d9b8bf5ca2?v=da0c16fd"></img>
         </>
       ) : uploading ? (
         <>
@@ -105,10 +105,10 @@ function GenerateAIImage({ context }) {
       ) : (
         <>
           <div className="create-image-container">
-            <h2 className="css-1y8j3c6-pageTitleClass">AI Image Generator</h2>            
+            <h2 className="css-1y8j3c6-pageTitleClass">AI Image Generator</h2>
           </div>
           <div className="image-operation-container">
-          <textarea
+            <textarea
               className="app-input"
               placeholder="Search Bears with Paint Brushes the Starry Night, painted by Vincent Van Gogh.."
               onChange={(e) => setPrompt(e.target.value)}
@@ -137,6 +137,9 @@ function GenerateAIImage({ context }) {
                       type="checkbox"
                       onChange={() => handleCheckboxChange(imageUrl)}
                       checked={selectedImages.includes(imageUrl)}
+                      style={{
+                        margin: "5px",
+                      }}
                     />
                     Image {index + 1}
                   </label>
@@ -151,18 +154,22 @@ function GenerateAIImage({ context }) {
               <></>
             )}
           </div>
-          {publicUrls?.length>0?(<>
-            <Button
-              variant="contained"
-              disableElevation
-              onClick={() => uploadSelectedImages()}
-              style={{
-                marginBottom: "64px",
-              }}
-            >
-              Upload Image
-            </Button>
-          </>):(<></>)}
+          {publicUrls?.length > 0 ? (
+            <>
+              <Button
+                variant="contained"
+                disableElevation
+                onClick={() => uploadSelectedImages()}
+                style={{
+                  marginTop: "20px",
+                }}
+              >
+                Upload Image
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
         </>
       )}
     </div>
