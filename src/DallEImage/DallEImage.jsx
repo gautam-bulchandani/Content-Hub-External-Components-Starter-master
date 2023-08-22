@@ -110,7 +110,7 @@ function GenerateAIImage({ context }) {
           <div className="image-operation-container">
             <textarea
               className="app-input"
-              placeholder="Search Bears with Paint Brushes the Starry Night, painted by Vincent Van Gogh.."
+              placeholder="Search SUGCON INDIA 2023..."
               onChange={(e) => setPrompt(e.target.value)}
               rows="10"
               cols="40"
